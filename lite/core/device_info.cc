@@ -1149,6 +1149,7 @@ void Device<TARGET(kCUDA)>::Init() {
 void Device<TARGET(kCUDA)>::GetInfo() {
   cudaGetDeviceProperties(&device_prop_, idx_);
   cudaRuntimeGetVersion(&runtime_version_);
+  generate_arch_ = device_prop_.major * 10 + device_prop_.minor;
   sm_version_ = (device_prop_.major << 8 | device_prop_.minor);
   has_hmma_ =
       (sm_version_ == 0x0700 || sm_version_ == 0x0702 || sm_version_ == 0x0705);

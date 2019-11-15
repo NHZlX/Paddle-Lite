@@ -206,7 +206,12 @@ class Context<TargetType::kCUDA> {
     CHECK(cublas_fp32_) << "cublas_fp32 should be set first";
     ctx->cublas_fp32_ = cublas_fp32_;
   }
-
+  CUDAContext& operator=(const CUDAContext& context) {
+    this->Init(
+        context.device_id_, context.exec_stream_id_, context.io_stream_id_);
+    this->cublas_fp32_ = context.cublas_fp32_;
+    return *this;
+  }
   const cudaStream_t& exec_stream() const { return exec_stream_; }
   void SetExecStream(cudaStream_t stream) { exec_stream_ = stream; }
 
@@ -230,9 +235,9 @@ class Context<TargetType::kCUDA> {
     output_events_.assign(output_events.begin(), output_events.end());
   }
 
+  int device_id() const { return device_id_; }
   std::string name() const { return "CUDAContext"; }
 
- private:
   int device_id_;
   // overall information
   int exec_stream_id_;

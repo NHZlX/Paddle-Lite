@@ -13,7 +13,10 @@
 // limitations under the License.
 
 #pragma once
+#include <memory>
+#include <vector>
 #include "lite/backends/cuda/blas.h"
+#include "lite/backends/cuda/math/gemm.h"
 #include "lite/core/context.h"
 #include "lite/core/kernel.h"
 #include "lite/core/types.h"
@@ -35,21 +38,6 @@ void mul_compute(const lite::cuda::Blas<float>& blas,
                  T* out) {
   float alpha = 1.0;
   float beta = 0.0;
-  /*
-  blas.sgemm(CUBLAS_OP_N,
-             CUBLAS_OP_N,
-             x_h,
-             y_w,
-             x_w,
-             &alpha,
-             x,
-             x_w,
-             y,
-             y_w,
-             &beta,
-             out,
-             x_h);
-  */
   blas.sgemm(CUBLAS_OP_N,
              CUBLAS_OP_N,
              y_w,
@@ -93,12 +81,24 @@ class MulCompute : public KernelLite<TARGET(kCUDA), PRECISION(kFloat)> {
             .Slice(param.y_num_col_dims, param.y->dims().size())
             .production());
     CHECK_EQ(x_w, y_h) << "x_w must be equal with y_h";
-    LOG(INFO) << x_h << " " << x_w << " " << y_h << " " << y_w;
 
     mul_compute<float>(blas, x_data, x_h, x_w, y_data, y_h, y_w, out_data);
   }
 
   virtual ~MulCompute() = default;
+};
+
+class MulComputeInt8 : public KernelLite<TARGET(kCUDA), PRECISION(kInt8)> {
+ public:
+  using param_t = operators::MulParam;
+
+  void PrepareForRun() override;
+  void Run() override;
+  virtual ~MulComputeInt8() = default;
+
+ private:
+  int m_, n_, k_;
+  std::unique_ptr<lite::cuda::math::Gemm<int8_t, float>> gemm_impl_;
 };
 
 }  // namespace cuda

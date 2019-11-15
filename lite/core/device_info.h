@@ -179,6 +179,7 @@ class Device<TARGET(kCUDA)> {
   bool has_hmma() { return has_fp16_; }
   bool has_imma() { return has_fp16_; }
   int runtime_version() { return runtime_version_; }
+  bool generate_arch() { return generate_arch_; }
 
  private:
   void CreateStream();
@@ -197,6 +198,7 @@ class Device<TARGET(kCUDA)> {
   bool has_hmma_;
   bool has_imma_;
   int runtime_version_;
+  int generate_arch_;
   std::vector<cudaStream_t> exec_stream_;
   std::vector<cudaStream_t> io_stream_;
 };
